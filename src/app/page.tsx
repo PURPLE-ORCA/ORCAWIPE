@@ -1,102 +1,335 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import type React from "react"
+
+import { useState, useRef, useCallback } from "react"
+import { Upload, Download, RotateCcw, Moon, Sun, Github, Shield } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { useTheme } from "next-themes"
+import Image from "next/image"
+
+export default function OrcaWipeApp() {
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [processedImage, setProcessedImage] = useState<string | null>(null)
+  const [progress, setProgress] = useState(0)
+  const [isDragOver, setIsDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { theme, setTheme } = useTheme()
+
+  const handleFileSelect = useCallback((file: File) => {
+    if (file && file.type.startsWith("image/")) {
+      setSelectedImage(file)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+      setProcessedImage(null)
+    }
+  }, [])
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      setIsDragOver(false)
+      const files = Array.from(e.dataTransfer.files)
+      if (files.length > 0) {
+        handleFileSelect(files[0])
+      }
+    },
+    [handleFileSelect],
+  )
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+  }, [])
+
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files
+      if (files && files.length > 0) {
+        handleFileSelect(files[0])
+      }
+    },
+    [handleFileSelect],
+  )
+
+  const simulateBackgroundRemoval = useCallback(async () => {
+    setIsProcessing(true)
+    setProgress(0)
+
+    // Simulate processing with progress
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval)
+          return 100
+        }
+        return prev + Math.random() * 15
+      })
+    }, 200)
+
+    // Simulate API call delay
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+
+    // For demo purposes, we'll use the same image as "processed"
+    // In a real app, this would be the result from your AI API
+    setProcessedImage(imagePreview)
+    setIsProcessing(false)
+    setProgress(100)
+  }, [imagePreview])
+
+  const handleTryAnother = useCallback(() => {
+    setSelectedImage(null)
+    setImagePreview(null)
+    setProcessedImage(null)
+    setProgress(0)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }, [])
+
+  const handleDownload = useCallback(() => {
+    if (processedImage) {
+      const link = document.createElement("a")
+      link.href = processedImage
+      link.download = "background-removed.png"
+      link.click()
+    }
+  }, [processedImage])
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen bg-background transition-colors duration-300">
+      {/* Header */}
+      <header className="border-b">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-lg"
+              style={{ backgroundColor: "#2f024f" }}
+            >
+              O
+            </div>
+            <span className="text-2xl font-bold">OrcaWipe</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
         </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-12 max-w-4xl">
+        {/* Hero Section */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+            Remove backgrounds instantly.
+          </h1>
+          <p className="text-xl text-muted-foreground font-medium">No fluff.</p>
+        </div>
+
+        {/* Main Content */}
+        {!selectedImage && (
+          <Card className="p-12 border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors">
+            <div
+              className={`text-center ${
+                isDragOver ? "scale-105" : ""
+              } transition-transform duration-200`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+            >
+              <div
+                className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "#2f024f" }}
+              >
+                <Upload className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-4">
+                Drop your image here
+              </h3>
+              <p className="text-muted-foreground mb-8">or click to browse</p>
+              <Button
+                size="lg"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-white"
+                style={{ backgroundColor: "#2f024f" }}
+              >
+                Choose Image
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+              <p className="text-sm text-muted-foreground mt-4">
+                Supports JPG, PNG, WebP up to 10MB
+              </p>
+            </div>
+          </Card>
+        )}
+
+        {selectedImage && !processedImage && (
+          <div className="space-y-8">
+            <Card className="p-8">
+              <div className="text-center">
+                <div className="relative w-full max-w-md mx-auto mb-6">
+                  <Image
+                    src={imagePreview! || "/placeholder.svg"}
+                    alt="Selected image"
+                    width={400}
+                    height={300}
+                    className="rounded-lg object-contain w-full h-auto max-h-64"
+                  />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">
+                  {selectedImage.name}
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  {(selectedImage.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+
+                {!isProcessing ? (
+                  <div className="flex gap-4 justify-center">
+                    <Button
+                      size="lg"
+                      onClick={simulateBackgroundRemoval}
+                      className="text-white"
+                      style={{ backgroundColor: "#2f024f" }}
+                    >
+                      Remove Background
+                    </Button>
+                    <Button variant="outline" onClick={handleTryAnother}>
+                      Choose Different Image
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div
+                      className="w-16 h-16 mx-auto border-4 border-t-transparent rounded-full animate-spin"
+                      style={{
+                        borderColor: "#2f024f",
+                        borderTopColor: "transparent",
+                      }}
+                    ></div>
+                    <p className="text-lg font-medium">
+                      Removing background...
+                    </p>
+                    <div className="max-w-xs mx-auto">
+                      <Progress value={progress} className="h-2" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {Math.round(progress)}% complete
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {processedImage && (
+          <div className="space-y-8">
+            <Card className="p-8">
+              <h3 className="text-2xl font-semibold text-center mb-8">
+                Background Removed!
+              </h3>
+
+              {/* Before/After Comparison */}
+              <div className="grid md:grid-cols-2 gap-8 mb-8">
+                <div className="text-center">
+                  <h4 className="text-lg font-medium mb-4 text-muted-foreground">
+                    Before
+                  </h4>
+                  <div className="relative">
+                    <Image
+                      src={imagePreview! || "/placeholder.svg"}
+                      alt="Original image"
+                      width={300}
+                      height={200}
+                      className="rounded-lg object-contain w-full h-auto max-h-48 border"
+                    />
+                  </div>
+                </div>
+                <div className="text-center">
+                  <h4 className="text-lg font-medium mb-4 text-muted-foreground">
+                    After
+                  </h4>
+                  <div className="relative">
+                    <Image
+                      src={processedImage || "/placeholder.svg"}
+                      alt="Processed image"
+                      width={300}
+                      height={200}
+                      className="rounded-lg object-contain w-full h-auto max-h-48 border"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 justify-center">
+                <Button
+                  size="lg"
+                  onClick={handleDownload}
+                  className="text-white"
+                  style={{ backgroundColor: "#2f024f" }}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
+                </Button>
+                <Button variant="outline" onClick={handleTryAnother}>
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Try Another
+                </Button>
+              </div>
+            </Card>
+          </div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* Footer */}
+      <footer className="border-t mt-24">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-muted-foreground">Made by Purple Orca</p>
+            <div className="flex items-center gap-6">
+              <a
+                href="https://github.com/PURPLE-ORCA/ORCAWIPE.git"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+              >
+                <Github className="w-4 h-4" />
+                GitHub
+              </a>
+              <a
+                href="/privacy"
+                className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+              >
+                <Shield className="w-4 h-4" />
+                Privacy Policy
+              </a>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );
