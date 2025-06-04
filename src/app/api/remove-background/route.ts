@@ -4,7 +4,7 @@ import { Client } from '@gradio/client';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    let { image: imageBase64 } = body;
+    const { image: imageBase64 } = body;
 
     if (!imageBase64 || typeof imageBase64 !== 'string') {
       return NextResponse.json({ error: 'Image data is required.' }, { status: 400 });
@@ -48,16 +48,18 @@ export async function POST(req: NextRequest) {
         console.error("Unexpected response structure from Gradio service (after expecting file object):", JSON.stringify(result, null, 2));
         return NextResponse.json({ error: 'Image processing service returned an unexpected response format.' }, { status: 500 });
       }
-    } catch (gradioError: any) {
+    } catch (gradioError: unknown) { // Use unknown
       console.error("Error during Gradio client operation or fetching processed image:", JSON.stringify(gradioError, null, 2));
       let userErrorMessage = 'Failed to process image via the external service.';
-      if (gradioError.message) {
-        userErrorMessage += ` Details: ${gradioError.message.substring(0, 150)}${gradioError.message.length > 150 ? '...' : ''}`;
+      // If you need to access gradioError.message, you'd add a type check:
+      if (gradioError instanceof Error && gradioError.message) {
+        userErrorMessage += ` Details: ${gradioError.message.substring(0, 100)}${gradioError.message.length > 100 ? '...' : ''}`;
       }
       return NextResponse.json({ error: userErrorMessage }, { status: 502 });
     }
-  } catch (serverError: any) {
+  } catch (serverError: unknown) { // Use unknown
     console.error("Internal server error in API route:", serverError);
+    // if (serverError instanceof Error) { /* access serverError.message */ }
     return NextResponse.json({ error: 'An internal server error occurred on our end.' }, { status: 500 });
   }
 }

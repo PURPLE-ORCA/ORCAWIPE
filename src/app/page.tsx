@@ -42,9 +42,15 @@ export default function OrcaWipeApp() {
         const { cleanedImageBase64 } = await apiResponse.json();
         setProcessedImageBase64(cleanedImageBase64);
 
-      } catch (err: any) {
+      } catch (err: unknown) { // Use unknown
         console.error("Error processing image:", err);
-        setError(err.message || "Failed to process image. Please try again.");
+        let message = "Failed to process image. Please try again.";
+        if (err instanceof Error) {
+          message = err.message || message;
+        } else if (typeof err === 'string') {
+          message = err;
+        }
+        setError(message);
         setProcessedImageBase64(null); // Clear any previous processed image on error
       } finally {
         setIsLoading(false);
