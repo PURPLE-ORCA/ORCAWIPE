@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OrcaWipe  배경 제거기 (Background Remover)
 
-## Getting Started
+OrcaWipe is a simple web application that removes the background from your images, instantly and for free. No fluff, just clean cutouts.
 
-First, run the development server:
+## ✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+*   **Upload Images:** Drag & drop or use the file picker to upload your JPG, PNG, or WebP images.
+*   **Automatic Background Removal:** Powered by a Hugging Face Space model (`eccv2022/dis-background-removal`).
+*   **Instant Preview:** See the original and the background-removed image side-by-side (once processing is complete).
+*   **Download Result:** Easily download your processed image with a transparent background.
+*   **Responsive Design:** Works on desktop and mobile.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+*   **Framework:** Next.js (App Router)
+*   **Language:** TypeScript
+*   **Styling:** Tailwind CSS
+*   **UI Components:** Shadcn/ui
+*   **Icons:** Iconify
+*   **Backend Service:** Hugging Face Spaces (via `@gradio/client`)
+*   **Deployment:** Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Getting Started (Development)
 
-## Learn More
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/PURPLE-ORCA/ORCAWIPE.git
+    cd orcawipe
+    ```
 
-To learn more about Next.js, take a look at the following resources:
+2.  **Install dependencies:**
+    (Choose your package manager)
+    ```bash
+    pnpm install
+    # or
+    npm install
+    # or
+    yarn install
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3.  **Run the development server:**
+    ```bash
+    pnpm dev
+    # or
+    npm run dev
+    # or
+    yarn dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📝 To-Do / Future Enhancements
 
-## Deploy on Vercel
+*   Loading progress indicators
+*   Tiny watermark for free users (potential monetization)
+*   Hero comparison slider (Original vs Cleaned)
+*   User authentication and image history
+*   Image enhancement features (super-resolution)
+*   Batch processing
+*   ...and more!
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Made by EL MOUSSAOUI MOHAMMED
